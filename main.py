@@ -20,5 +20,5 @@ async def receive_webhook(request: Request):
 
 
 @app.get("/webhooks")
-def get_events():
+def get_webhooks():
     return webhooks
