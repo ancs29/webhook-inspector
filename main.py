@@ -9,13 +9,13 @@ webhooks = []
 async def receive_webhook(request: Request):
     body = await request.body()
 
-    event = {
+    webhook = {
         "body": body.decode(),
         "headers": dict(request.headers),
         "query_params": dict(request.query_params),
     }
 
-    webhooks.append(event)
+    webhooks.append(webhook)
     return {"status": "ok"}
 
 
