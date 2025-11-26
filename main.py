@@ -4,8 +4,6 @@ app = FastAPI()
 
 webhooks = []
 
-# arbitrary comment
-
 
 @app.post("/receive")
 async def receive_webhook(request: Request):
