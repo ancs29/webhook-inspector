@@ -38,7 +38,3 @@ def get_webhooks():
 @app.exception_handler(Exception)
 async def global_exception_handler(_request: Request, _exc: Exception):
     return JSONResponse(status_code=500, content={"detail": "Internal server error"})
-
-
-# Understand and check global exception handler function
-# Figure out how to format try and except blocks in receive function and all functions
