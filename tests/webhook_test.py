@@ -20,3 +20,12 @@ def test_receive_and_get_webhooks():
     assert last_webhook["body"] == test_webhook
     assert "headers" in last_webhook
     assert "query_params" in last_webhook
+
+
+def test_invalid_json_webhook():
+    response = client.post("/receive", data="invalid json string")
+    assert response.status_code == 400
+
+    webhooks = client.get("/webhooks").json()
+    if webhooks:
+        assert webhooks[-1]["body"] != "invalid json string"
