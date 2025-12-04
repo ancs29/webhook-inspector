@@ -29,3 +29,14 @@ def test_invalid_json_webhook():
     webhooks = client.get("/webhooks").json()
     if webhooks:
         assert webhooks[-1]["body"] != "invalid json string"
+
+
+def test_invalid_utf8_webhook():
+    invalid_bytes = b"\xff\xfe\xfd\xfc"
+    response = client.post("/receive", data=invalid_bytes)
+    assert response.status_code == 400
+
+    webhooks = client.get("/webhooks").json()
+    if webhooks:
+        last_event = webhooks[-1]
+        assert last_event["body"] != invalid_bytes.decode("utf-8", errors="ignore")
