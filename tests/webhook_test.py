@@ -1,25 +1,74 @@
+import json
+
+import pytest
 from fastapi.testclient import TestClient
-from main import app
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
+
+from db import Base
+from main import app, get_db
+
+SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
+
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL,
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
+)
+
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+def override_get_db():
+    db = TestingSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)
 
 
+@pytest.fixture(autouse=True)
+def clear_db():
+    """Clear the database before each test"""
+    # Clear all tables
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+    yield
+
+
 def test_receive_and_get_webhooks():
     test_webhook = {"event": "test", "value": 123}
+
     response = client.post("/receive", json=test_webhook)
     assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+    assert "id" in response.json()
+    assert response.json()["status"] == "saved"
 
+    # Fetch from DB
     response = client.get("/webhooks")
     assert response.status_code == 200
 
     webhooks = response.json()
-    assert len(webhooks) >= 1
+    assert len(webhooks) == 1
 
     last_webhook = webhooks[-1]
-    assert last_webhook["body"] == test_webhook
-    assert "headers" in last_webhook
-    assert "query_params" in last_webhook
+
+    # BODY stored as string → need json.loads
+    assert json.loads(last_webhook["body"]) == test_webhook
+
+    # HEADERS stored as JSON string too
+    headers = json.loads(last_webhook["headers"])
+    assert isinstance(headers, dict)
+    # assert "host" in headers
+
+    query_params = json.loads(last_webhook["query_params"])
+    assert isinstance(query_params, dict)
 
 
 def test_invalid_json_webhook():
@@ -27,8 +76,7 @@ def test_invalid_json_webhook():
     assert response.status_code == 400
 
     webhooks = client.get("/webhooks").json()
-    if webhooks:
-        assert webhooks[-1]["body"] != "invalid json string"
+    assert len(webhooks) == 0  # nothing should have been saved
 
 
 def test_invalid_utf8_webhook():
@@ -37,6 +85,4 @@ def test_invalid_utf8_webhook():
     assert response.status_code == 400
 
     webhooks = client.get("/webhooks").json()
-    if webhooks:
-        last_event = webhooks[-1]
-        assert last_event["body"] != invalid_bytes.decode("utf-8", errors="ignore")
+    assert len(webhooks) == 0

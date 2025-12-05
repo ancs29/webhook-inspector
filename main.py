@@ -1,15 +1,28 @@
 import json
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
+from sqlalchemy.orm import Session
+
+from db import Base, SessionLocal, engine
+from model import WebhookTable
+
+Base.metadata.create_all(bind=engine)
+
 
 app = FastAPI()
 
-webhooks = []
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 @app.post("/receive")
-async def receive_webhook(request: Request):
+async def receive_webhook(request: Request, db: Session = Depends(get_db)):
 
     try:
         body_text = (await request.body()).decode("utf-8")
@@ -21,19 +34,50 @@ async def receive_webhook(request: Request):
     except json.JSONDecodeError as exc:
         raise HTTPException(status_code=400, detail="Invalid JSON data") from exc
 
-    webhook = {
-        "body": body_json,
-        "headers": dict(request.headers),
-        "query_params": dict(request.query_params),
-    }
+    webhook = WebhookTable(
+        body=json.dumps(body_json),
+        headers=json.dumps(dict(request.headers)),
+        query_params=json.dumps(dict(request.query_params)),
+    )
 
-    webhooks.append(webhook)
-    return {"status": "ok"}
+    db.add(webhook)
+    db.commit()
+    db.refresh(webhook)
+
+    return {"status": "saved", "id": webhook.id}
 
 
 @app.get("/webhooks")
-def get_webhooks():
-    return webhooks
+def get_webhooks(db: Session = Depends(get_db)):
+    webhooks = db.query(WebhookTable).all()
+
+    return [
+        {
+            "id": row.id,
+            "body": row.body,
+            "headers": row.headers,
+            "query_params": row.query_params,
+        }
+        for row in webhooks
+    ]
+
+
+# ADD TEST FUNCTION FOR INDIVIDUAL WEBHOOK RETRIEVAL
+
+
+@app.get("/webhooks/{webhook_id}")
+def get_webhook(webhook_id: int, db: Session = Depends(get_db)):
+    webhook = db.query(WebhookTable).filter(WebhookTable.id == webhook_id).first()
+
+    if not webhook:
+        return {"error": "Not found"}
+
+    return {
+        "id": webhook.id,
+        "body": webhook.body,
+        "headers": json.loads(webhook.headers),
+        "query_params": json.loads(webhook.query_params),
+    }
 
 
 @app.exception_handler(Exception)
