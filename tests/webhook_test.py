@@ -86,3 +86,26 @@ def test_invalid_utf8_webhook():
 
     webhooks = client.get("/webhooks").json()
     assert len(webhooks) == 0
+
+
+def test_get_individual_webhook():
+
+    test_webhook = {"event": "user.created", "user_id": 42}
+    response = client.post("/receive", json=test_webhook)
+    assert response.status_code == 200
+    webhook_id = response.json()["id"]
+
+    # Retrieve the individual webhook
+    response = client.get(f"/webhooks/{webhook_id}")
+    assert response.status_code == 200
+
+    webhook = response.json()
+    assert webhook["id"] == webhook_id
+    assert json.loads(webhook["body"]) == test_webhook
+    assert isinstance(webhook["headers"], dict)
+    assert isinstance(webhook["query_params"], dict)
+
+    # Test non-existent webhook
+    response = client.get("/webhooks/99999")
+    assert response.status_code == 200
+    assert response.json() == {"error": "Not found"}
