@@ -62,9 +62,6 @@ def get_webhooks(db: Session = Depends(get_db)):
     ]
 
 
-# ADD TEST FUNCTION FOR INDIVIDUAL WEBHOOK RETRIEVAL
-
-
 @app.get("/webhooks/{webhook_id}")
 def get_webhook(webhook_id: int, db: Session = Depends(get_db)):
     webhook = db.query(WebhookTable).filter(WebhookTable.id == webhook_id).first()
