@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, Text
 
-from db import Base
+from .db import Base
 
 
 class WebhookTable(Base):

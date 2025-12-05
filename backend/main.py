@@ -4,8 +4,8 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
-from db import Base, SessionLocal, engine
-from model import WebhookTable
+from .db import Base, SessionLocal, engine
+from .model import WebhookTable
 
 Base.metadata.create_all(bind=engine)
 
