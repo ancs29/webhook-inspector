@@ -12,4 +12,4 @@ __pycache__/
 .DS_Store
 
 # Webhook database
-webhooks.db
+# webhooks.db
