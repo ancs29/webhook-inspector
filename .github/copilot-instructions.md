@@ -1,49 +1,155 @@
 <!-- Copilot instructions for the `webhook-inspector` repo -->
 
-# Quick orientation
+# Project Context
 
-- Repo name: `webhook-inspector` — currently a minimal Python project.
-- Primary file: `main.py` (present, currently empty). Edit this file for main app logic unless adding a clear multi-file structure.
-- Git ignores: see `.gitignore` (virtualenv `venv/`, `__pycache__/`, `.vscode/`, macOS artifacts). Keep these conventions.
+**Purpose:** A webhook inspector application built as a portfolio piece to demonstrate professional full-stack development skills to potential employers.
 
-# What an AI coding agent should know and do first
+**Quality Standards:** Maintain professional-grade organization, detailed documentation, consistent formatting, and comprehensive test coverage. This is a showcase project—every commit should reflect production-ready code quality.
 
-1. Treat this as a small Python project. If a feature requires dependencies, add a `requirements.txt` at repo root and document how to run in `README.md`.
-2. Use a virtualenv called `venv/` (this is already in `.gitignore`). Typical local workflow:
+# Architecture Overview
 
-   - create: `python3 -m venv venv`
-   - activate (zsh): `source venv/bin/activate`
-   - install: `pip install -r requirements.txt`
-   - run: `python main.py`
+## Backend (`backend/`)
+- **Framework:** FastAPI with SQLAlchemy ORM
+- **Database:** SQLite (production: `webhooks.db`, tests: in-memory with StaticPool)
+- **Structure:** Python package with relative imports
+  - `main.py` - FastAPI routes (POST /receive, GET /webhooks, GET /webhooks/{id})
+  - `db.py` - SQLAlchemy engine and session configuration
+  - `model.py` - WebhookTable ORM model
+- **Key Patterns:**
+  - JSON serialization for storing dicts in Text columns
+  - Dependency injection with `get_db()` for database sessions
+  - UTF-8 and JSON validation on webhook intake
 
-3. If you add a new tool (formatters, linters, test runner), add its config files and list it in `requirements.txt` and update `README.md` with the exact commands above.
+## Frontend (`webhook-inspector-frontend/`)
+- **Framework:** React 19 with Vite 7
+- **Structure:** Standard Vite scaffold
+  - `src/App.jsx` - Main application component
+  - `vite.config.js` - Build configuration (needs proxy setup for backend)
+  - `package.json` - Dependencies and scripts
 
-# Coding conventions and repository-specific patterns
+## Testing (`tests/`)
+- **Framework:** pytest with TestClient
+- **Coverage:** 4 unit tests covering webhook creation, retrieval, validation errors
+- **Key Patterns:**
+  - In-memory SQLite with StaticPool for connection persistence
+  - `@pytest.fixture(autouse=True)` for database isolation between tests
+  - Tests verify JSON serialization, UTF-8 validation, individual/bulk retrieval
 
-- Keep the project single-module until there's a clear need to split: prefer enhancing `main.py` for prototypes/features.
-- Respect `.gitignore` when creating new environments, caches, or editor metadata.
-- Tests (if added) should live under `tests/` and use `pytest`. Add `pytest` to `requirements.txt` when introducing tests.
+# Development Workflow
 
-# Common edits an agent will perform and how to do them
+## Backend Setup
+```zsh
+# From repo root
+python3 -m venv venv
+source venv/bin/activate  # zsh
+pip install -r requirements.txt
+uvicorn backend.main:app --reload  # Run development server
+pytest  # Run all tests
+```
 
-- Adding dependencies: create or update `requirements.txt`. Do not modify system/global packages.
-- Adding a CLI: prefer `argparse` in `main.py` for minimal footprint (no new frameworks unless required).
-- Adding an HTTP endpoint: prefer lightweight frameworks (Flask) and only add when justified — include `requirements.txt` and a short run example in `README.md`.
+## Frontend Setup
+```zsh
+# From webhook-inspector-frontend/
+npm install
+npm run dev  # Starts Vite dev server on port 5173
+npm run build  # Production build
+npm run lint  # ESLint check
+```
 
-# Commit / PR guidance for the agent
+# Coding Standards for AI Agents
 
-- Keep commits focused and small. Each change that adds a dependency must include a README short note explaining how to run locally.
-- PR description should include: what changed, how to run, and a minimal verification checklist (e.g., "run `python main.py` and observe X").
+## General Principles
+1. **Professional Quality:** Write production-ready code with clear variable names, proper error handling, and informative comments
+2. **Test Everything:** Add tests for new features. Maintain 100% pass rate before committing
+3. **Document Changes:** Update README.md when adding features or changing setup steps
+4. **Git Hygiene:** Small, focused commits with descriptive messages
 
-# What not to assume
+## Backend Conventions
+- Use relative imports within `backend/` package (`.db`, `.model`, `.main`)
+- Serialize Python objects to JSON before storing in Text columns
+- Include type hints on function signatures
+- Handle database sessions with try/finally or context managers
+- Validate input data (UTF-8 encoding, JSON structure) before persisting
 
-- The repo currently has no CI, tests, or package metadata. Do not add heavy infra (CI) without user approval.
-- No target Python minor version is specified; aim for broad compatibility (Python 3.8+), and document any stricter requirement in `README.md`.
+## Frontend Conventions
+- Follow React hooks patterns (useState, useEffect for API calls)
+- Use semantic HTML and accessible markup
+- Implement error boundaries for graceful failure handling
+- Keep components focused and single-responsibility
 
-# If you need more context
+## Testing Conventions
+- Use descriptive test names: `test_<action>_<expected_outcome>`
+- Arrange-Act-Assert structure
+- Test both success and failure paths
+- Use fixtures for setup/teardown (database clearing, test data)
+- Import from `backend` package, not relative paths
 
-- Ask the repo owner whether to scaffold a full package layout (src/, setup, CI) or keep things single-file.
-- Ask which Python versions to support and whether to use tools like `black`/`isort`/`pytest` before adding them.
+## File Organization
+- `requirements.txt` - Backend Python dependencies
+- `webhook-inspector-frontend/package.json` - Frontend Node dependencies
+- `.gitignore` - Excludes `venv/`, `webhooks.db`, `node_modules/`, `__pycache__/`, `.vscode/`
+- Keep production data files (`webhooks.db`) out of version control
+
+# Common Tasks for AI Agents
+
+## Adding Backend Endpoint
+1. Add route function in `backend/main.py`
+2. Update `model.py` if new database columns needed
+3. Add corresponding test in `tests/webhook_test.py`
+4. Update README.md with endpoint documentation
+
+## Adding Frontend Feature
+1. Update `src/App.jsx` or create new component
+2. Configure proxy in `vite.config.js` if calling backend
+3. Add CORS middleware in `backend/main.py` if needed
+4. Test cross-origin requests work correctly
+
+## Database Schema Changes
+1. Modify `backend/model.py` ORM model
+2. Delete `webhooks.db` (dev database will recreate)
+3. Update tests to match new schema
+4. Document migration strategy in commit message
+
+## Performance/Optimization
+1. Add indexes to frequently queried columns
+2. Implement pagination for large result sets
+3. Consider caching strategies for repeated queries
+4. Profile with appropriate tools before optimizing
+
+# What NOT to Assume
+
+- **Don't add** formatters (black, prettier) without asking—user may have preferences
+- **Don't add** CI/CD without approval—this is planned but not yet implemented
+- **Don't add** heavy frameworks or dependencies without justification
+- **Don't create** documentation files summarizing changes unless requested
+- **Don't guess** at implementation details—ask clarifying questions for ambiguous requirements
+
+# Tech Stack Details
+
+- **Python:** 3.14 (FastAPI, SQLAlchemy, pytest)
+- **Node:** Latest stable (React 19, Vite 7, ESLint)
+- **Database:** SQLite with Text columns for JSON storage
+- **Shell:** zsh on macOS
+- **Editor:** VS Code with GitHub Copilot
+
+# Current State & Priorities
+
+**Completed:**
+- ✅ FastAPI backend with webhook capture/retrieval endpoints
+- ✅ SQLite persistence with proper JSON serialization
+- ✅ 4 passing unit tests with in-memory database isolation
+- ✅ React frontend scaffolded with Vite
+
+**In Progress:**
+- Frontend UI implementation (webhook list/detail views)
+- Backend-frontend integration (proxy, CORS, API calls)
+
+**Future Considerations:**
+- Real-time webhook updates (WebSockets or polling)
+- Search/filter functionality
+- Request replay capabilities
+- Deployment configuration
 
 ---
-If any section is unclear or you'd like the agent to follow stricter rules (formatting, testing, CI), tell me and I will update this file.
+
+**Agent Guidance:** Treat every change as if it's being reviewed in a job interview. Prioritize clarity, maintainability, and professional standards. When in doubt, ask rather than assume.
