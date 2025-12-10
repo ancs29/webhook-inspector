@@ -1,7 +1,8 @@
 import json
 
 from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from .db import Base, SessionLocal, engine
@@ -11,6 +12,8 @@ Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI()
+
+templates = Jinja2Templates(directory="templates")
 
 
 def get_db():
@@ -47,6 +50,18 @@ async def receive_webhook(request: Request, db: Session = Depends(get_db)):
     return {"status": "saved", "id": webhook.id}
 
 
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request, db: Session = Depends(get_db)):
+    # Query all webhooks from database
+    webhooks = db.query(WebhookTable).all()
+
+    # Pass webhooks to template
+    return templates.TemplateResponse(
+        "index.html", {"request": request, "webhooks": webhooks}
+    )
+
+
+# REDUNDANT FUNCTION, REMOVE LATER!!!
 @app.get("/webhooks")
 def get_webhooks(db: Session = Depends(get_db)):
     webhooks = db.query(WebhookTable).all()

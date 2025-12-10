@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Webhook Inspector</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div class="container mx-auto p-8">
+        <h1 class="text-3xl font-bold mb-6">Webhook Inspector</h1>
+        
+        <table class="min-w-full bg-white border border-gray-300">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">ID</th>
+                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Headers</th>
+                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Body</th>
+                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Query Params</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for webhook in webhooks %}
+                <tr class="border-t hover:bg-gray-50 cursor-pointer" onclick="window.location='/webhooks/{{ webhook.id }}'">
+                    <td class="px-6 py-4">{{ webhook.id }}</td>
+                    <td class="px-6 py-4">{{ webhook.headers[:20] }}</td>
+                    <td class="px-6 py-4">{{ webhook.body[:80] }}</td>
+                    <td class="px-6 py-4">{{ webhook.query_params[:20] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        {% if not webhooks %}
+        <p>No webhooks received yet.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
