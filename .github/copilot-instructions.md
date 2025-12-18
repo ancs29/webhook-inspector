@@ -12,7 +12,7 @@
 - **Framework:** FastAPI with SQLAlchemy ORM
 - **Database:** SQLite (production: `webhooks.db`, tests: in-memory with StaticPool)
 - **Structure:** Python package with relative imports
-  - `main.py` - FastAPI routes (POST /receive, GET /webhooks, GET /webhooks/{id})
+  - `main.py` - FastAPI routes (API: POST /api/receive, GET /api/webhooks, GET /api/webhooks/{id}; Web: GET /, GET /{id})
   - `db.py` - SQLAlchemy engine and session configuration
   - `model.py` - WebhookTable ORM model
 - **Key Patterns:**

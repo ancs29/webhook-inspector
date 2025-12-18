@@ -45,13 +45,13 @@ def clear_db():
 def test_receive_and_get_webhooks():
     test_webhook = {"event": "test", "value": 123}
 
-    response = client.post("/receive", json=test_webhook)
+    response = client.post("/api/receive", json=test_webhook)
     assert response.status_code == 200
     assert "id" in response.json()
     assert response.json()["status"] == "saved"
 
     # Fetch from DB
-    response = client.get("/webhooks")
+    response = client.get("/api/webhooks")
     assert response.status_code == 200
 
     webhooks = response.json()
@@ -72,31 +72,31 @@ def test_receive_and_get_webhooks():
 
 
 def test_invalid_json_webhook():
-    response = client.post("/receive", data="invalid json string")
+    response = client.post("/api/receive", data="invalid json string")
     assert response.status_code == 400
 
-    webhooks = client.get("/webhooks").json()
+    webhooks = client.get("/api/webhooks").json()
     assert len(webhooks) == 0  # nothing should have been saved
 
 
 def test_invalid_utf8_webhook():
     invalid_bytes = b"\xff\xfe\xfd\xfc"
-    response = client.post("/receive", data=invalid_bytes)
+    response = client.post("/api/receive", data=invalid_bytes)
     assert response.status_code == 400
 
-    webhooks = client.get("/webhooks").json()
+    webhooks = client.get("/api/webhooks").json()
     assert len(webhooks) == 0
 
 
 def test_get_individual_webhook():
 
     test_webhook = {"event": "user.created", "user_id": 42}
-    response = client.post("/receive", json=test_webhook)
+    response = client.post("/api/receive", json=test_webhook)
     assert response.status_code == 200
     webhook_id = response.json()["id"]
 
     # Retrieve the individual webhook
-    response = client.get(f"/webhooks/{webhook_id}")
+    response = client.get(f"/api/webhooks/{webhook_id}")
     assert response.status_code == 200
 
     webhook = response.json()
@@ -106,6 +106,6 @@ def test_get_individual_webhook():
     assert isinstance(webhook["query_params"], dict)
 
     # Test non-existent webhook
-    response = client.get("/webhooks/99999")
+    response = client.get("/api/webhooks/99999")
     assert response.status_code == 200
     assert response.json() == {"error": "Not found"}
