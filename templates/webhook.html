@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Webhook {{ webhook.id }} - Details</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div class="container mx-auto p-8">
+        <a href="/" class="text-blue-600 hover:underline mb-4 inline-block">&larr; Back to list</a>
+        
+        <h1 class="text-3xl font-bold mb-6">Webhook #{{ webhook.id }}</h1>
+        
+        <div class="bg-white border border-gray-300 p-6 mb-4">
+            <h2 class="text-xl font-semibold mb-2">Body</h2>
+            <pre class="bg-gray-100 p-4 rounded overflow-x-auto">{{ body_formatted }}</pre>
+        </div>
+        
+        <div class="bg-white border border-gray-300 p-6 mb-4">
+            <h2 class="text-xl font-semibold mb-2">Headers</h2>
+            <pre class="bg-gray-100 p-4 rounded overflow-x-auto">{{ headers_formatted }}</pre>
+        </div>
+        
+        <div class="bg-white border border-gray-300 p-6 mb-4">
+            <h2 class="text-xl font-semibold mb-2">Query Parameters</h2>
+            <pre class="bg-gray-100 p-4 rounded overflow-x-auto">{{ query_params_formatted }}</pre>
+        </div>
+    </div>
+</body>
+</html>

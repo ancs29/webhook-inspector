@@ -8,8 +8,32 @@
     <div class="container mx-auto p-8">
         <h1 class="text-3xl font-bold mb-6">Webhook Inspector</h1>
         
+        <div class="mb-6 p-4 bg-gray-100 border border-gray-300 rounded">
+            <h2 class="text-lg font-semibold mb-2">Send Webhooks To:</h2>
+            <div class="flex items-center gap-2">
+                <input 
+                    type="text" 
+                    id="webhookUrl" 
+                    value="{{ webhook_url }}" 
+                    readonly 
+                    class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded"
+                />
+                <button 
+                    onclick="copyWebhookUrl()" 
+                    class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                >
+                    Copy URL
+                </button>
+            </div>
+            <p class="text-sm text-gray-600 mt-2">Send a webhook to this URL to see it appear below (valid JSON only)</p>
+        </div>
+        
+        <button onclick="location.reload()" class="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            Refresh Table
+        </button>
+        
         <table class="min-w-full bg-white border border-gray-300">
-            <thead class="bg-gray-100">
+            <thead class="bg-gray-100">    
                 <tr>
                     <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">ID</th>
                     <th class="px-6 py-3 text-left text-sm font-medium text-gray-700">Headers</th>
@@ -19,7 +43,7 @@
             </thead>
             <tbody>
                 {% for webhook in webhooks %}
-                <tr class="border-t hover:bg-gray-50 cursor-pointer" onclick="window.location='/webhooks/{{ webhook.id }}'">
+                <tr class="border-t hover:bg-gray-50 cursor-pointer" onclick="window.location='/{{ webhook.id }}'">
                     <td class="px-6 py-4">{{ webhook.id }}</td>
                     <td class="px-6 py-4">{{ webhook.headers[:20] }}</td>
                     <td class="px-6 py-4">{{ webhook.body[:80] }}</td>
@@ -33,5 +57,15 @@
         <p>No webhooks received yet.</p>
         {% endif %}
     </div>
+
+    <script>
+    function copyWebhookUrl() {
+        const urlInput = document.getElementById('webhookUrl');
+        urlInput.select();
+        navigator.clipboard.writeText(urlInput.value);
+        alert('URL copied to clipboard!');
+    }
+    </script>
+
 </body>
 </html>
