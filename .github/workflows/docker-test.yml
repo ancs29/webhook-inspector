@@ -1,0 +1,40 @@
+name: Test Docker Build
+
+on:
+  workflow_dispatch:  # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  docker-build-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Build Docker image
+        run: docker build -t webhook-inspector:test .
+      
+      - name: Run container health check
+        run: |
+          # Start container in background
+          docker run -d \
+            --name test-container \
+            -p 8000:8000 \
+            -e DATABASE_URL=sqlite:///./test.db \
+            webhook-inspector:test
+          
+          # Wait for container to start
+          sleep 5
+          
+          # Check if container is running
+          docker ps | grep test-container
+          
+          # Test health endpoint (should return 200)
+          curl -f http://localhost:8000 || exit 1
+          
+          # Clean up
+          docker stop test-container
+          docker rm test-container
+      
+      - name: Docker build success
+        run: echo "✅ Docker image builds and runs successfully!"
