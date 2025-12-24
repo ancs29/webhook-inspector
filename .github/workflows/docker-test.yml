@@ -14,6 +14,14 @@ jobs:
       - name: Build Docker image
         run: docker build -t webhook-inspector:test .
       
+      - name: Run unit tests in container
+        run: |
+          # Run pytest inside the Docker container
+          docker run --rm \
+            -e DATABASE_URL=sqlite:///./test.db \
+            webhook-inspector:test \
+            pytest tests/ -v
+      
       - name: Run container health check
         run: |
           # Start container in background
@@ -29,12 +37,17 @@ jobs:
           # Check if container is running
           docker ps | grep test-container
           
-          # Test health endpoint (should return 200)
+          # Test home page endpoint
           curl -f http://localhost:8000 || exit 1
+          
+          # Test API endpoint with actual webhook
+          curl -f -X POST http://localhost:8000/api/receive \
+            -H "Content-Type: application/json" \
+            -d '{"test": "data"}' || exit 1
           
           # Clean up
           docker stop test-container
           docker rm test-container
       
-      - name: Docker build success
-        run: echo "✅ Docker image builds and runs successfully!"
+      - name: Docker validation complete
+        run: echo "✅ Docker image builds, tests pass, and app runs successfully!"
