@@ -14,6 +14,10 @@ Attributes:
 """
 
 import json
+import os
+
+# Set the DATABASE_URL environment variable to use SQLite for tests
+os.environ["DATABASE_URL"] = "sqlite:///./test.db"
 
 import pytest
 from fastapi.testclient import TestClient
