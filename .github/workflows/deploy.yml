@@ -41,5 +41,13 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
       
-      - name: Build complete
-        run: echo "✅ Image pushed to ECR successfully!"
+      - name: Update ECS service
+        run: |
+          aws ecs update-service \
+            --cluster webhook-inspector-cluster \
+            --service webhook-inspector-service \
+            --force-new-deployment \
+            --region eu-west-1
+      
+      - name: Deployment complete
+        run: echo "✅ New image deployed to AWS ECS!"
