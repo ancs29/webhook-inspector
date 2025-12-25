@@ -11,6 +11,13 @@ ENV/
 # Database files
 *.db
 *.db-journal
+test.db
+
+# AWS configuration
+task-definition.json
+
+# Test artifacts
+.pytest_cache/
 
 # IDE
 .vscode/

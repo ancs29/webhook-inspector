@@ -11,5 +11,14 @@ __pycache__/
 # macOS system files
 .DS_Store
 
-# Webhooks database
+# Database files
 webhooks.db
+test.db
+*.db
+*.db-journal
+
+# AWS configuration (contains secrets)
+task-definition.json
+
+# Test artifacts
+.pytest_cache/
