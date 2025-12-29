@@ -1,7 +1,7 @@
 
 # Online Webhook Inspector
 
-This webhook inspector is a backend-focused developer tool designed to aid in debugging webhook integrations. It accepts incoming HTTP POST requests, validates their contents, and provides both API and web-based interfaces for inspecting webhook payloads, headers, and query parameters.
+This webhook inspector is a developer tool designed to aid in debugging webhook integrations. It accepts incoming HTTP POST requests, validates their contents, and provides both API and web-based interfaces for inspecting webhook payloads, headers, and query parameters.
 
 Link - http://webhook-inspector-alb-1832205148.eu-west-1.elb.amazonaws.com/
 ## Author
