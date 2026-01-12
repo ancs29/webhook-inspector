@@ -48,8 +48,6 @@ def get_db():
 
 
 # ----------- API ROUTES ----------- #
-
-
 @app.post("/api/webhooks")
 async def receive_webhook(request: Request, db: Session = Depends(get_db)):
     """This route receives incoming webhooks and stores them in the database.
@@ -64,7 +62,7 @@ async def receive_webhook(request: Request, db: Session = Depends(get_db)):
         db: SQLAlchemy database session
 
     Returns:
-        dict: Response containing the status and the ID of the saved webhook
+        JSONResponse: Response containing the status code and the ID of the saved webhook
 
     Raises:
         HTTPException: Code 400 if the body is not valid UTF-8 or not valid JSON.
@@ -107,7 +105,7 @@ def get_webhooks(db: Session = Depends(get_db)):
         db: SQLAlchemy database session
 
     Returns:
-        list[dict]: List of dictionaries representing each webhook
+        JSONResponse: List of dictionaries representing each webhook and status code 200
     """
 
     webhooks = db.query(WebhookTable).all()
@@ -138,7 +136,8 @@ def get_webhook(webhook_id: int, db: Session = Depends(get_db)):
         db: SQLAlchemy database session
 
     Returns:
-        dict: Dictionary representing the webhook data or an error response
+        JSONResponse: Response containing the webhook data or an error response, with the
+        appropriate status code
     """
     webhook = db.query(WebhookTable).filter(WebhookTable.id == webhook_id).first()
 
@@ -170,7 +169,7 @@ async def home(request: Request, db: Session = Depends(get_db)):
         db: SQLAlchemy database session
 
     Returns:
-        TemplateResponse: HTML page rendered from the "index.html" template
+        TemplateResponse: HTML page rendered from the "index.html" template, with status code 200
     """
     webhooks = db.query(WebhookTable).all()
 
@@ -200,7 +199,7 @@ async def webhook_detail(
         db: SQLAlchemy database session
 
     Returns:
-        TemplateResponse: HTML page rendered from the "webhook.html" template
+        TemplateResponse: HTML page rendered from the "webhook.html" template, with status code 200
 
     Raises:
         HTTPException: Raised with status code 404 if the webhook is not found
