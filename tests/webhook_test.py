@@ -84,7 +84,7 @@ def test_receive_and_get_webhooks():
     test_webhook = {"event": "test", "value": 123}
 
     response = client.post("/api/webhooks", json=test_webhook)
-    assert response.status_code == 200
+    assert response.status_code == 201
     assert "id" in response.json()
     assert response.json()["status"] == "saved"
 
@@ -148,7 +148,7 @@ def test_get_individual_webhook():
 
     test_webhook = {"event": "user.created", "user_id": 42}
     response = client.post("/api/webhooks", json=test_webhook)
-    assert response.status_code == 200
+    assert response.status_code == 201
     webhook_id = response.json()["id"]
 
     response = client.get(f"/api/webhooks/{webhook_id}")
@@ -161,5 +161,16 @@ def test_get_individual_webhook():
     assert isinstance(webhook["query_params"], dict)
 
     response = client.get("/api/webhooks/99999")
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Webhook not found"}
+
+
+def test_empty_webhook_list():
+    """
+    Tests GET /api/webhooks when no webhooks are stored.
+    Test validates that the response is a 200 OK with an empty array.
+    """
+
+    response = client.get("/api/webhooks")
     assert response.status_code == 200
-    assert response.json() == {"error": "Not found"}
+    assert response.json() == []

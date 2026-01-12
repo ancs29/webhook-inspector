@@ -92,7 +92,7 @@ async def receive_webhook(request: Request, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(webhook)
 
-    return {"status": "saved", "id": webhook.id}
+    return JSONResponse(status_code=201, content={"status": "saved", "id": webhook.id})
 
 
 @app.get("/api/webhooks")
@@ -112,7 +112,7 @@ def get_webhooks(db: Session = Depends(get_db)):
 
     webhooks = db.query(WebhookTable).all()
 
-    return [
+    content = [
         {
             "id": row.id,
             "body": row.body,
@@ -121,6 +121,8 @@ def get_webhooks(db: Session = Depends(get_db)):
         }
         for row in webhooks
     ]
+
+    return JSONResponse(status_code=200, content=content)
 
 
 @app.get("/api/webhooks/{webhook_id}")
@@ -141,14 +143,16 @@ def get_webhook(webhook_id: int, db: Session = Depends(get_db)):
     webhook = db.query(WebhookTable).filter(WebhookTable.id == webhook_id).first()
 
     if not webhook:
-        return {"error": "Not found"}
+        return JSONResponse(status_code=404, content={"detail": "Webhook not found"})
 
-    return {
+    content = {
         "id": webhook.id,
         "body": webhook.body,
         "headers": json.loads(webhook.headers),
         "query_params": json.loads(webhook.query_params),
     }
+
+    return JSONResponse(status_code=200, content=content)
 
 
 # ----------- HTML ROUTES ----------- #
@@ -175,6 +179,7 @@ async def home(request: Request, db: Session = Depends(get_db)):
     return templates.TemplateResponse(
         "index.html",
         {"request": request, "webhooks": webhooks, "webhook_url": webhook_url},
+        status_code=200,
     )
 
 
@@ -218,6 +223,7 @@ async def webhook_detail(
             "headers_formatted": headers_formatted,
             "query_params_formatted": query_params_formatted,
         },
+        status_code=200,
     )
 
 
