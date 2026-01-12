@@ -50,7 +50,7 @@ def get_db():
 # ----------- API ROUTES ----------- #
 
 
-@app.post("/api/receive")
+@app.post("/api/webhooks")
 async def receive_webhook(request: Request, db: Session = Depends(get_db)):
     """This route receives incoming webhooks and stores them in the database.
 
@@ -170,7 +170,7 @@ async def home(request: Request, db: Session = Depends(get_db)):
     """
     webhooks = db.query(WebhookTable).all()
 
-    webhook_url = f"{request.url.scheme}://{request.url.netloc}/api/receive"
+    webhook_url = f"{request.url.scheme}://{request.url.netloc}/api/webhooks"
 
     return templates.TemplateResponse(
         "index.html",

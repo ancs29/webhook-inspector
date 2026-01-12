@@ -56,10 +56,10 @@ The design decisions of this project were made to demonstrate professional devel
 
 ### API Routes
 
-#### Receive Webhook
+#### Create Webhook
 
 ```http
-  POST /api/receive
+  POST /api/webhooks
 ```
 
 | Parameter | Type     | Description                |

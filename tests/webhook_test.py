@@ -75,7 +75,7 @@ def test_receive_and_get_webhooks():
     Test the receive route: POST webhook and retrieve it from GET route.
 
     Validates that:
-    - POST /api/receive accepts JSON and returns 200 and the webhook's database ID
+    - POST /api/webhooks accepts JSON and returns 200 and the webhook's database ID
     - Webhook is stored in database with serialized JSON fields
     - GET /api/webhooks returns the saved webhook
     - Body, headers, and query_params are correctly serialized/deserialized
@@ -83,7 +83,7 @@ def test_receive_and_get_webhooks():
 
     test_webhook = {"event": "test", "value": 123}
 
-    response = client.post("/api/receive", json=test_webhook)
+    response = client.post("/api/webhooks", json=test_webhook)
     assert response.status_code == 200
     assert "id" in response.json()
     assert response.json()["status"] == "saved"
@@ -109,11 +109,11 @@ def test_invalid_json_webhook():
     """
     Test that invalid JSON is rejected with 400 error.
 
-    Validates that POST /api/receive returns 400 when sent
+    Validates that POST /api/webhooks returns 400 when sent
     invalid JSON data, and ensures nothing is saved to the database.
     """
 
-    response = client.post("/api/receive", data="invalid json string")
+    response = client.post("/api/webhooks", data="invalid json string")
     assert response.status_code == 400
 
     webhooks = client.get("/api/webhooks").json()
@@ -124,12 +124,12 @@ def test_invalid_utf8_webhook():
     """
     Test that invalid UTF-8 bytes are rejected with 400 error.
 
-    Validates that POST /api/receive returns 400 Bad Request when sent
+    Validates that POST /api/webhooks returns 400 Bad Request when sent
     data with invalid UTF-8 encoding, and ensures nothing is saved.
     """
 
     invalid_bytes = b"\xff\xfe\xfd\xfc"
-    response = client.post("/api/receive", data=invalid_bytes)
+    response = client.post("/api/webhooks", data=invalid_bytes)
     assert response.status_code == 400
 
     webhooks = client.get("/api/webhooks").json()
@@ -147,7 +147,7 @@ def test_get_individual_webhook():
     """
 
     test_webhook = {"event": "user.created", "user_id": 42}
-    response = client.post("/api/receive", json=test_webhook)
+    response = client.post("/api/webhooks", json=test_webhook)
     assert response.status_code == 200
     webhook_id = response.json()["id"]
 

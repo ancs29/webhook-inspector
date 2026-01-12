@@ -22,3 +22,5 @@ task-definition.json
 
 # Test artifacts
 .pytest_cache/
+
+interview_practice.py

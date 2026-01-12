@@ -41,7 +41,7 @@ jobs:
           curl -f http://localhost:8000 || exit 1
           
           # Test API endpoint with actual webhook
-          curl -f -X POST http://localhost:8000/api/receive \
+          curl -f -X POST http://localhost:8000/api/webhooks \
             -H "Content-Type: application/json" \
             -d '{"test": "data"}' || exit 1
           
