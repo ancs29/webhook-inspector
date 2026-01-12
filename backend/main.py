@@ -156,7 +156,7 @@ def get_webhook(webhook_id: int, db: Session = Depends(get_db)):
 
 # ----------- HTML ROUTES ----------- #
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request, db: Session = Depends(get_db)):
+def home(request: Request, db: Session = Depends(get_db)):
     """Renders the home page displaying all received webhooks and the URL to send webhooks to.
 
     Returns an HTML page rendered from the "index.html" Jinja2 template.
@@ -183,9 +183,7 @@ async def home(request: Request, db: Session = Depends(get_db)):
 
 
 @app.get("/{webhook_id}", response_class=HTMLResponse)
-async def webhook_detail(
-    webhook_id: int, request: Request, db: Session = Depends(get_db)
-):
+def webhook_detail(webhook_id: int, request: Request, db: Session = Depends(get_db)):
     """This route returns a web page displaying the details of a specific webhook.
 
     The page shows the webhook's body, headers, and query parameters in a pretty-printed JSON
@@ -228,7 +226,7 @@ async def webhook_detail(
 
 # ----------- GLOBAL EXCEPTION HANDLER ----------- #
 @app.exception_handler(Exception)
-async def global_exception_handler(_request: Request, _exc: Exception):
+def global_exception_handler(_request: Request, _exc: Exception):
     """This is a global exception handler that catches unhandled exceptions in the application.
 
     This handler is triggered whenever an unexpected error occurs in any route.
